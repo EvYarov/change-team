@@ -124,10 +124,12 @@ p { margin: 0; }
 .verdict { font: 700 clamp(20px, 2.4vw, 28px)/1.25 var(--display); }
 .verdict-sub { margin-top: 10px; color: var(--ink-soft); }
 .sample-note[hidden] { display: none !important; }
+.sample-note.quiet-note { color: var(--ink-soft); font-weight: 500; }
 .sample-note { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--gap); }
 .table-scroll { overflow-x: auto; }
 .scroll-hint { display: none; font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
-table.map { border-collapse: collapse; width: 100%; min-width: 1000px; font-size: 15px; }
+table.map { border-collapse: collapse; width: 100%; min-width: 1000px; font-size: 15px; table-layout: fixed; }
+table.map col.c-ind { width: 240px; } table.map col.c-st { width: 220px; }
 table.map th, table.map td { padding: 5px 6px; text-align: left; vertical-align: middle; background: var(--paper); }
 table.map thead th { font-weight: 600; font-size: 13px; color: var(--ink-soft); vertical-align: bottom; border-bottom: 2px solid var(--ink); }
 table.map thead label { display: block; margin-bottom: 4px; }
@@ -182,7 +184,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
 .m-row .k { font-size: 15.5px; margin-bottom: 8px; }
 .m-seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .m-seg button { min-height: 44px; border: 1px solid var(--leaf); border-radius: 4px; background: var(--paper); color: var(--ink); font: 600 16px var(--body); font-variant-numeric: tabular-nums; }
-.m-seg button[aria-pressed="true"] { background: var(--action); border-color: var(--action); color: #fff; }
+.m-seg button[aria-pressed="true"], table.map select.filled { background: var(--leaf); border-color: var(--action); box-shadow: inset 0 0 0 1px var(--action); color: var(--ink); }
 .m-row .st { margin-top: 8px; font-size: 13px; }
 
 @media (max-width: 960px) {
@@ -224,7 +226,8 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
   .verdict { font-size: 14px; }
   .legend { margin-top: 4px; font-size: 9px; }
   .table-scroll { overflow: visible; }
-  table.map { min-width: 0; font-size: 9.5px; }
+  table.map { min-width: 0; font-size: 9.5px; table-layout: auto; }
+  table.map col.c-ind, table.map col.c-st { width: auto; }
   table.map th, table.map td { padding: 1px 4px; line-height: 1.3; }
   table.map .sticky { position: static; min-width: 0; }
   table.map tr.group th { padding-top: 4px; font-size: 9px; }
@@ -496,7 +499,7 @@ const storageOk = (() => { try { localStorage.setItem('__t', '1'); localStorage.
 
 
 function buildTable() {
-  let h = '<thead><tr><th class="sticky" scope="col">Индикатор</th>';
+  let h = `<colgroup><col class="c-ind">${'<col>'.repeat(N)}<col class="c-st"></colgroup><thead><tr><th class="sticky" scope="col">Индикатор</th>`;
   for (let j = 0; j < N; j++) h += `<th scope="col"><label for="nm${j}">Участник ${j + 1}</label><input id="nm${j}" data-n="${j}" value="${esc(state.names[j] || '')}" placeholder="Имя"><span class="pv" id="pn${j}"></span></th>`;
   h += '<th scope="col">Покрытие</th></tr></thead><tbody>';
   let r = 0;
@@ -534,6 +537,7 @@ function refresh() {
     row.who = w;
     for (let j = 0; j < N; j++) {
       const sel = document.getElementById(`s${r}_${j}`);
+      sel.classList.toggle('filled', sel.value !== '');
       const pv = document.getElementById(`pv${r}_${j}`);
       pv.textContent = sel.value === '' ? '' : sel.value === 'nd' ? 'н/д' : sel.value;
       pv.className = 'pv';
@@ -549,7 +553,9 @@ function refresh() {
   else { const parts = []; if (cnt.warn) parts.push(`${cnt.warn} ${plural(cnt.warn, 'держится', 'держатся', 'держатся')} на одном человеке`); if (cnt.bad) parts.push(`${cnt.bad} ${plural(cnt.bad, 'пробел', 'пробела', 'пробелов')}`); if (cnt.none) parts.push(`по ${cnt.none} нет данных`);
     const rest = cnt.warn + cnt.bad + cnt.none;
     v.textContent = `Команда закрывает ${cnt.ok} из 24.${rest ? ` Остальные ${rest}: ${parts.join(', ')}.` : ''}`; }
-  document.getElementById('sampleNote').style.display = state.example ? 'inline-block' : 'none';
+  const sn = document.getElementById('sampleNote');
+  sn.textContent = state.example ? 'Сейчас заполнен пример. Впишите своих людей или очистите карту.' : (storageOk ? 'Данные сохраняются в этом браузере.' : '');
+  sn.classList.toggle('quiet-note', !state.example);
   const bad = todo.filter((x) => x.s === 'bad'), warn = todo.filter((x) => x.s === 'warn'), zero = todo.filter((x) => x.who.zero.length);
   const few = (arr) => (arr.length > 3 ? `${arr.slice(0, 3).join(', ')} и ещё ${arr.length - 3}` : arr.join(', '));
   const ref = (x) => `<b>${esc(x.k)}</b> <span class="crit-ref">(${C[x.c - 1].name.toLowerCase()})</span>`;
