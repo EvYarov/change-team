@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Команда изменений</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Идея: страница построена вокруг сетки 8 × 3 — 24 индикатора, которые команда закрывает вместе.
+     Сетка — единственный яркий элемент; всё остальное тихое, выровнено по левому краю, заголовки разделов в левой колонке. */
+  --paper: #FFFFFF;
+  --mist: #F3F7F4;
+  --ink: #0F3D22;
+  --ink-soft: #4F6B5A;
+  --brand: #2DAB49;
+  --action: #1E8238;
+  --leaf: #CDEBD4;
+  --gap: #B23A0C;
+  --gap-soft: #FBE9E2;
+  --display: "Unbounded", "Arial Black", sans-serif;
+  --body: "Golos Text", "Segoe UI", Roboto, Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--body); }
+a { color: var(--action); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+
+.shell { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.top { display: flex; align-items: center; gap: 28px; height: 64px; }
+.top .mark { font: 700 16px/1 var(--display); color: var(--ink); text-decoration: none; }
+.top nav { display: flex; gap: 22px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.top nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 15px; white-space: nowrap; padding: 10px 0; border-bottom: 2px solid transparent; }
+.top nav a:hover { border-color: var(--brand); }
+
+/* ---------- hero ---------- */
+.hero { padding: 56px 0 72px; max-width: 820px; }
+.hero h1 { font-size: clamp(34px, 5.4vw, 64px); line-height: 1.04; }
+.hero .lead { margin-top: 22px; font-size: 19px; color: var(--ink-soft); max-width: 30em; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 2px solid var(--action); background: var(--action); color: #fff; font: 600 16px/1 var(--body); text-decoration: none; cursor: pointer; }
+.btn.quiet { background: transparent; color: var(--action); }
+.btn:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.hero figure { margin: 0; }
+.hero figcaption { margin-top: 14px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- мозаика 8 × 3 ---------- */
+.mosaic { display: grid; gap: 6px; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1fr) auto 64px; gap: 14px; align-items: center; }
+.mname { font-size: 15px; }
+.mcells { display: grid; grid-template-columns: repeat(3, 32px); gap: 4px; }
+.mcount { font-size: 14px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.cell { height: 32px; border-radius: 3px; display: block; position: relative; }
+.cell.ok { background: var(--action); }
+.cell.warn { background: var(--leaf); }
+.cell.bad { background: var(--paper); box-shadow: inset 0 0 0 2px var(--gap); }
+.cell.bad::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--gap) 50%, transparent calc(50% + 1px)); opacity: .5; border-radius: 3px; }
+.cell.none { background: var(--mist); }
+@media (pointer: coarse) { .mcells { grid-template-columns: repeat(3, 40px); } .cell { height: 40px; } }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 14px; font-size: 14px; color: var(--ink-soft); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 14px; height: 14px; border-radius: 2px; display: inline-block; }
+.legend .ok i { background: var(--action); } .legend .warn i { background: var(--leaf); } .legend .bad i { box-shadow: inset 0 0 0 2px var(--gap); }
+
+/* ---------- разделы: заголовок слева, содержание справа ---------- */
+.part { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 48px; padding: 64px 0; scroll-margin-top: 16px; }
+.part + .part { border-top: 1px solid var(--leaf); }
+.part > header h2 { font-size: 26px; line-height: 1.15; position: sticky; top: 24px; }
+.part > header p { margin-top: 12px; color: var(--ink-soft); font-size: 15.5px; position: sticky; top: 90px; }
+.body-col { max-width: 720px; }
+.body-col.wide { max-width: none; }
+#map.part { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+#map.part > header h2, #map.part > header p { position: static; }
+#map.part > header p { max-width: 640px; }
+
+.when { display: grid; gap: 22px; }
+.when div { display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
+.when b { font-weight: 600; }
+.when span { color: var(--ink-soft); }
+
+.roles { display: grid; gap: 0; }
+.role { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--mist); }
+.role .name { font: 700 18px/1.2 var(--display); display: block; }
+.role .crits { display: block; font-size: 14px; color: var(--ink-soft); margin-top: 4px; }
+.strip { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; }
+.strip i { height: 12px; border-radius: 1px; background: var(--mist); }
+.strip i.on { background: var(--brand); }
+.role .gives { color: var(--ink-soft); }
+
+.stages { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.stages h3 { font-size: 19px; margin-bottom: 8px; }
+.stages p { color: var(--ink); }
+.intro { margin-bottom: 26px; color: var(--ink-soft); }
+
+.crit { display: block; padding: 28px 0; scroll-margin-top: 16px; }
+.crit + .crit { border-top: 1px solid var(--mist); }
+.crit h3 .n { color: var(--action); }
+.crit h3 { font-size: 21px; line-height: 1.2; }
+.crit .meta { margin-top: 6px; color: var(--ink-soft); }
+.crit .meta b { color: var(--ink); font-weight: 600; }
+.crit dl { margin: 16px 0 0; display: grid; grid-template-columns: 240px 1fr; gap: 10px 22px; }
+.crit dt { font-weight: 600; }
+.crit dd { margin: 0; }
+.crit .extra { margin-top: 14px; font-size: 16px; }
+.crit .extra b { font-weight: 600; }
+.crit .extra.def b { color: var(--gap); }
+
+.scale { display: grid; grid-template-columns: 56px 160px 1fr; gap: 12px 18px; align-items: baseline; }
+.scale .v { font: 700 22px/1 var(--display); color: var(--action); }
+.scale .t { font-weight: 600; }
+
+/* ---------- карта ---------- */
+.map-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-bottom: 32px; }
+.map-top > div:first-child { max-width: 640px; }
+.map-top > div + div { max-width: 680px; }
+.verdict { font: 700 clamp(20px, 2.4vw, 28px)/1.25 var(--display); }
+.verdict-sub { margin-top: 10px; color: var(--ink-soft); }
+.sample-note[hidden] { display: none !important; }
+.sample-note { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--gap); }
+.table-scroll { overflow-x: auto; }
+.scroll-hint { display: none; font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+table.map { border-collapse: collapse; width: 100%; min-width: 1000px; font-size: 15px; }
+table.map th, table.map td { padding: 5px 6px; text-align: left; vertical-align: middle; background: var(--paper); }
+table.map thead th { font-weight: 600; font-size: 13px; color: var(--ink-soft); vertical-align: bottom; border-bottom: 2px solid var(--ink); }
+table.map thead label { display: block; margin-bottom: 4px; }
+table.map thead input { width: 100%; min-width: 74px; min-height: 38px; border: 1px solid var(--leaf); border-radius: 3px; padding: 6px 8px; font: 600 15px var(--body); color: var(--ink); background: var(--mist); }
+table.map .sticky { position: sticky; left: 0; z-index: 1; min-width: 220px; max-width: 260px; }
+table.map tr.group th { padding-top: 22px; font: 700 14px/1.2 var(--display); color: var(--ink); border-bottom: 1px solid var(--leaf); }
+table.map tr.group th small { font: 500 13px var(--body); color: var(--ink-soft); margin-left: 8px; }
+table.map tbody td { border-bottom: 1px solid var(--mist); }
+table.map select { width: 100%; min-width: 64px; min-height: 38px; font: 600 15px var(--body); padding: 4px 6px; border: 1px solid var(--leaf); border-radius: 3px; background: var(--paper); color: var(--ink); font-variant-numeric: tabular-nums; cursor: pointer; }
+table.map select.v3 { background: var(--action); border-color: var(--action); color: #fff; }
+table.map select.v2 { background: var(--leaf); border-color: var(--leaf); }
+.st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.st i { width: 14px; height: 14px; border-radius: 2px; display: inline-block; flex: none; }
+.st.ok i { background: var(--action); } .st.warn i { background: var(--leaf); } .st.bad i { box-shadow: inset 0 0 0 2px var(--gap); } .st.none i { background: var(--mist); }
+.stc { min-width: 200px; }
+.who { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; line-height: 1.35; }
+.st.bad { color: var(--gap); } .st.none { color: var(--ink-soft); }
+.map-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 22px; }
+.status-msg { font-size: 14px; font-weight: 600; color: var(--action); }
+.linkbtn { background: none; border: 0; padding: 12px 4px; font: 600 14px var(--body); color: var(--action); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.todo { margin-top: 36px; max-width: 760px; }
+.todo h3 { font-size: 20px; margin-bottom: 12px; }
+.todo h4 { font: 600 17px/1.3 var(--body); margin: 18px 0 2px; }
+.todo-hint { color: var(--ink-soft); font-size: 15px; }
+.todo ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.todo li b { font-weight: 600; }
+.crit-ref { color: var(--ink-soft); }
+
+.steps { margin: 0; padding-left: 22px; display: grid; gap: 12px; }
+.steps b, .rules b { font-weight: 600; }
+.rules { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 12px; }
+.rules li { padding-left: 18px; border-left: 3px solid var(--brand); }
+.sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.sources b { font-weight: 600; }
+footer { padding: 32px 0 48px; border-top: 1px solid var(--leaf); color: var(--ink-soft); font-size: 14px; }
+.scale-inline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 36px 0 12px; max-width: 980px; }
+.scale-inline div { border-left: 3px solid var(--leaf); padding: 2px 0 2px 10px; }
+.scale-inline dt { font: 700 18px/1.2 var(--display); color: var(--action); }
+.scale-inline dd { margin: 2px 0 0; font-size: 14px; color: var(--ink-soft); line-height: 1.35; }
+.rule-line { margin-bottom: 20px; font-weight: 600; }
+details.ind-d summary { cursor: pointer; }
+details.ind-d summary::marker { color: var(--ink-soft); }
+details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft); line-height: 1.45; }
+.pv, .print-only { display: none; }
+.m-editor { display: none; }
+.m-step, .m-name { display: block; font-weight: 600; font-size: 15px; margin: 0 0 8px; }
+.m-people { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.m-people button { flex: none; min-height: 44px; padding: 0 14px; border: 1px solid var(--leaf); border-radius: 4px; background: var(--paper); color: var(--ink); font: 600 15px var(--body); }
+.m-people button[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+#mName { width: 100%; min-height: 44px; border: 1px solid var(--leaf); border-radius: 4px; padding: 8px 12px; font: 500 16px var(--body); color: var(--ink); background: var(--mist); margin-bottom: 8px; }
+.m-group { margin-top: 24px; }
+.m-group h4 { font: 700 15px/1.3 var(--display); margin: 0 0 4px; }
+.m-row { scroll-margin-top: 12px; padding: 12px 0; border-bottom: 1px solid var(--mist); }
+.m-row .k { font-size: 15.5px; margin-bottom: 8px; }
+.m-seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.m-seg button { min-height: 44px; border: 1px solid var(--leaf); border-radius: 4px; background: var(--paper); color: var(--ink); font: 600 16px var(--body); font-variant-numeric: tabular-nums; }
+.m-seg button[aria-pressed="true"] { background: var(--action); border-color: var(--action); color: #fff; }
+.m-seg button.two[aria-pressed="true"] { background: var(--leaf); border-color: var(--action); color: var(--ink); }
+.m-row .st { margin-top: 8px; font-size: 13px; }
+
+@media (max-width: 960px) {
+  .hero { padding-top: 24px; }
+  .part { grid-template-columns: 1fr; gap: 20px; padding: 48px 0; }
+  .part > header h2, .part > header p { position: static; }
+  .map-top { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .shell { padding: 0 18px; }
+  .top { gap: 16px; } .top nav { gap: 16px; }
+  .when div, .stages { grid-template-columns: 1fr; gap: 4px; }
+  .stages { gap: 22px; }
+  .role { grid-template-columns: 1fr; gap: 4px; }
+  .crit dl { grid-template-columns: 1fr; gap: 2px; }
+  .crit dd { margin-bottom: 10px; }
+  .scale { grid-template-columns: 44px 1fr; }
+  .scale .d { grid-column: 2; margin-top: -8px; color: var(--ink-soft); }
+  .table-scroll { display: none; }
+  .m-editor { display: block; }
+  .scale-inline { grid-template-columns: 1fr 1fr; }
+}
+@media (pointer: coarse) {
+  table.map select, table.map thead input { min-height: 44px; }
+}
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  body { font-size: 11px; }
+  .top, .hero, .part:not(#map), footer, .map-actions, .sample-note, .scroll-hint, .map-top .verdict-sub { display: none !important; }
+  #map { display: block; padding: 0; border: 0; }
+  #map > header h2 { position: static; font-size: 18px; }
+  #map > header p { display: none; }
+  .print-only { display: block; font-size: 11px; color: var(--ink-soft); margin: 2px 0 8px; }
+  .scale-inline, .rule-line { display: none !important; }
+  details.ind-d .desc { display: none; } details.ind-d summary { list-style: none; } details.ind-d summary::marker { content: ''; }
+  .map-top { display: block; margin-bottom: 6px; }
+  .map-top > div + div { display: none; }
+  .verdict { font-size: 14px; }
+  .legend { margin-top: 4px; font-size: 9px; }
+  .table-scroll { overflow: visible; }
+  table.map { min-width: 0; font-size: 9.5px; }
+  table.map th, table.map td { padding: 1px 4px; line-height: 1.3; }
+  table.map .sticky { position: static; min-width: 0; }
+  table.map tr.group th { padding-top: 4px; font-size: 9px; }
+  table.map select, table.map thead input, table.map thead label { display: none !important; }
+  .pv { display: inline; font-weight: 600; } .pv.v3 { color: var(--action); font-weight: 700; }
+  table.map tr { break-inside: avoid; }
+  .st { font-size: 9px; } .st i { width: 9px; height: 9px; } .who { display: inline; font-size: 8.5px; margin: 0 0 0 4px; } .stc { min-width: 0; white-space: nowrap; }
+  .todo { break-before: page; max-width: none; }
+  .todo li { font-size: 12px; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <a class="mark" href="#top">T×DG</a>
+    <nav aria-label="Разделы">
+      <a href="#criteria">Критерии</a>
+      <a href="#map">Карта</a>
+      <a href="#how">Что дальше</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div>
+        <h1>Ни у&nbsp;кого нет всех 24&nbsp;качеств. У&nbsp;команды они есть.</h1>
+        <p class="lead">Модель для подбора команды, которая внедряет изменения: 8 критериев, 24 поведенческих индикатора и карта, которая показывает, где у команды пробелы.</p>
+        <div class="actions">
+          <a class="btn" href="#map">Заполнить карту своей команды</a>
+          <a class="btn quiet" href="#criteria">Посмотреть критерии</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" id="when">
+      <header><h2>Когда это нужно</h2></header>
+      <div class="body-col when">
+        <div><b>Перед запуском изменения</b><span>Собрать проектную команду из людей, которые дополняют друг друга.</span></div>
+        <div><b>Когда изменение буксует</b><span>Увидеть, какой роли в команде не хватает.</span></div>
+        <div><b>При планировании развития</b><span>Понять, кого с кем поставить в пару.</span></div>
+      </div>
+    </section>
+
+    <section class="part" id="roles">
+      <header><h2>Семь ролей</h2><p>Один человек может закрывать 2–3 роли, одну роль могут закрывать несколько человек.</p></header>
+      <div class="body-col">
+        <div class="roles" id="rolesList"></div>
+      </div>
+    </section>
+
+    <section class="part" id="stages">
+      <header><h2>Два этапа</h2><p>Состав команды не обязан быть постоянным.</p></header>
+      <div class="body-col stages">
+        <div><h3>Запуск</h3><p>Нужны те, кто открыт к новому (критерий 7) и готов работать в неопределённости (критерий 8): они пробуют, ошибаются и показывают первые результаты.</p></div>
+        <div><h3>Закрепление</h3><p>Подключаются те, кто присоединился позже, когда изменение уже показало результат. Их сила — в экспертизе, настойчивости и доверии коллег, которые тоже сомневались.</p></div>
+      </div>
+    </section>
+
+    <section class="part" id="criteria">
+      <header><h2>Восемь критериев</h2><p>У каждого — зачем он команде, три поведенческих индикатора и признаки дефицита: поведение, которое показывает, что критерия не хватает.</p></header>
+      <div class="body-col" id="critList"></div>
+    </section>
+
+    <section class="part" id="map">
+      <header><h2>Карта команды</h2><p>До семи человек. Ставьте оценку по конкретному эпизоду: когда вы видели это поведение и что человек сделал. Надёжнее, если оценки дают 2–3 человека: руководитель, коллега из смежного подразделения и сам участник. Данные остаются только в вашем браузере.</p></header>
+      <div class="body-col wide">
+        <p class="print-only">Карта команды изменений. Дата: <span id="printDate"></span>. Шкала: 0 — не проявляется, 1 — эпизодически, 2 — устойчиво, 3 — образец, н/д — не было случая увидеть. Индикатор закрыт, если у одного человека оценка 3, а у другого — не ниже 2.</p>
+        <div class="map-top">
+          <div>
+            <p class="verdict" id="verdict" aria-live="polite"></p>
+            <p class="verdict-sub">Сетка обновляется, пока вы ставите оценки. Три клетки в строке — три индикатора критерия. Нажмите на клетку, чтобы перейти к строке с именами.</p>
+            <span class="sample-note" id="storageNote" hidden>Этот браузер не сохраняет данные страницы: после перезагрузки карта вернётся к примеру. Чтобы сохранить результат, распечатайте карту.</span>
+            <span class="sample-note" id="sampleNote">Сейчас заполнен пример. Впишите своих людей или очистите карту.</span>
+          </div>
+          <div>
+            <div class="mosaic" id="liveMosaic" aria-label="Покрытие индикаторов вашей командой"></div>
+            <div class="legend"><span class="ok"><i></i>закрыт</span><span class="warn"><i></i>держится на одном человеке</span><span class="bad"><i></i>никто не силён</span></div>
+          </div>
+        </div>
+                <dl class="scale-inline" aria-label="Шкала оценки">
+          <div><dt>0</dt><dd>не проявляется</dd></div>
+          <div><dt>1</dt><dd>эпизодически, в простых ситуациях</dd></div>
+          <div><dt>2</dt><dd>устойчиво, в том числе в сложных</dd></div>
+          <div><dt>3</dt><dd>образец, на человека опираются</dd></div>
+          <div><dt>н/д</dt><dd>не было случая увидеть</dd></div>
+        </dl>
+        <p class="rule-line">Индикатор закрыт, если у одного человека оценка 3, а у другого — не ниже 2.</p>
+        <div class="table-scroll"><table class="map" id="mapTable"></table></div>
+        <div class="m-editor" id="mEditor">
+          <p class="m-step">Кого оцениваете</p>
+          <div class="m-people" id="mPeople" role="tablist" aria-label="Участники"></div>
+          <label class="m-name" for="mName">Имя участника <span id="mNameNum">1</span></label>
+          <input id="mName" type="text" placeholder="Имя">
+          <div id="mList"></div>
+        </div>
+        <div class="map-actions">
+          <button class="btn" type="button" id="printBtn">Распечатать карту</button>
+          <button class="btn quiet" type="button" id="clearBtn">Очистить карту</button>
+          <button class="btn quiet" type="button" id="exampleBtn">Вернуть пример</button>
+          <span class="status-msg" id="statusMsg" role="status"></span>
+          <button class="linkbtn" type="button" id="undoBtn" hidden>Вернуть данные</button>
+        </div>
+        <div class="todo" id="todo"></div>
+      </div>
+    </section>
+
+    <section class="part" id="how">
+      <header><h2>Что делать с результатом</h2></header>
+      <div class="body-col">
+        <ol class="steps">
+          <li><b>Обсудите пробелы,</b> начиная со списка «Что закрыть в первую очередь». Сначала индикаторы, в которых никто не силён, потом те, что держатся на одном человеке.</li>
+          <li><b>Распределите людей по этапам:</b> кто запускает изменение, кто подключается на закреплении.</li>
+          <li><b>Закройте пробелы:</b> добавьте в команду человека с оценкой 3 по нужному индикатору, поставьте в пару сильного и развивающегося участника или привлеките внешнего эксперта либо спонсора.</li>
+        </ol>
+        <ul class="rules">
+          <li><b>Один сильный участник — узкое место.</b> Если индикатор закрывает один человек, на нём замыкается слишком много решений и контактов.</li>
+          <li><b>Правило покрытия — рабочий ориентир,</b> а не норма. Корректируйте его под масштаб изменения.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="part" id="sources">
+      <header><h2>На что опирается модель</h2></header>
+      <div class="body-col">
+        <ul class="sources">
+          <li><b>Коттер, «направляющая коалиция».</b> Изменение ведёт группа, а не один человек; ей нужны позиционная власть, экспертиза, доверие к участникам и лидерство.</li>
+          <li><b>Battilana &amp; Casciaro, Harvard Business Review, 2013.</b> Исследование 68 изменений в британской системе здравоохранения NHS: успешнее были агенты изменений, занимавшие центральное место в неформальной сети, независимо от должности; люди, связывающие разрозненные группы, лучше внедряли радикальные изменения.</li>
+          <li><b>Исследования Евгения Ярова и команды T×DG.</b> Наблюдения за командами, которые внедряют изменения, в проектах организационного развития, на стратегических и командных сессиях, а также опросы участников о результатах внедрения после сессий.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>T×DG (ООО «ТД ГРУП»)</footer>
+</div>
+
+<script>
+const C = [
+  { n: 1, name: 'Стратегическое мышление', role: 'Стратег', why: 'связывает изменение с целью бизнеса и видит последствия дальше ближайшего шага.',
+    ind: [['Разбирает проблему до решения', 'Прежде чем предлагать, выясняет причины, собирает факты и сравнивает хотя бы два варианта, а не берёт первый пришедший в голову.'],
+          ['Связывает изменение с целью', 'Формулирует в 1–2 предложениях, какую проблему решает изменение и по каким признакам станет понятно, что оно сработало.'],
+          ['Смотрит дальше текущей задачи', 'Оценивает последствия на горизонте полугода–года, заранее называет, где изменение может забуксовать, и предлагает, как это проверить.']],
+    def: 'не может объяснить, зачем нужно изменение, кроме «так решили наверху»; предлагает решения, которые снимают симптом, но создают новую проблему через квартал.' },
+  { n: 2, name: 'Лидерство и влияние', role: 'Проводник', why: 'за этим человеком идут, даже когда приказать нельзя.',
+    ind: [['Влияет без формальных полномочий', 'За советом обращаются коллеги из других команд и уровней; поддержка этого человека меняет позицию других.'],
+          ['Вовлекает, а не агитирует', 'Приглашает коллег в работу над изменением, отдаёт им понятную зону ответственности и отмечает их вклад.'],
+          ['Показывает пример', 'Первым начинает работать по-новому и открыто рассказывает, что получается, а что нет.']],
+    def: 'влияние держится только на должности; на совещаниях «продаёт» изменение, а в своей работе ничего не меняет.' },
+  { n: 3, name: 'Коммуникация', role: 'Проводник', why: 'изменение одинаково понимают на всех уровнях, а сомнения становятся материалом для улучшения, а не скрытым саботажем.',
+    ind: [['Объясняет просто и под аудиторию', 'Излагает суть изменения за 2–3 минуты: команде — через то, что поменяется в работе, руководству — через результат и риски.'],
+          ['Слушает и проверяет понимание', 'Задаёт уточняющие вопросы, пересказывает позицию собеседника своими словами и меняет предложение, если услышал весомый аргумент.'],
+          ['Работает с сопротивлением и разногласиями', 'Выясняет причину сомнений, отделяет обоснованные возражения от опасений и ищет решение, которое снимает спор, а не продавливает свою позицию.']],
+    def: 'считает любые сомнения саботажем; говорит одинаково с любой аудиторией; избегает трудных разговоров.' },
+  { n: 4, name: 'Кросс-функциональное взаимодействие', role: 'Связной', why: 'изменение не застревает на стыках между подразделениями.',
+    ind: [['Знает, кто есть кто', 'Понимает, кто в смежных подразделениях принимает решения и на кого повлияет изменение; лично знает этих людей.'],
+          ['Координирует стыки', 'Договаривается между отделами о сроках, ответственности и порядке передачи работы и проверяет, что договорённости выполняются.'],
+          ['Учитывает интересы других функций', 'До того как предлагать решение, выясняет, что оно меняет для смежных подразделений, и ищет вариант, приемлемый для обеих сторон.']],
+    def: '«это не наш вопрос»; улучшает свой участок за счёт соседей; общается с другими отделами только через руководителя.' },
+  { n: 5, name: 'Экспертиза и реализация', role: 'Практик', why: 'идея превращается в работающий процесс.',
+    ind: [['Знает процессы «как есть»', 'Понимает, как работа устроена на практике, а не только по регламенту, и показывает конкретные точки, где нужны изменения.'],
+          ['Переводит идею в план', 'Разбивает изменение на шаги, оценивает ресурсы и сроки, предлагает пилот на ограниченном участке.'],
+          ['Решает проблемы внедрения на ходу', 'Когда на старте что-то ломается, находит рабочее решение самостоятельно или знает, к кому идти, не дожидаясь, пока проблему поднимут наверх.']],
+    def: 'хорошо знает теорию, но нет опыта, когда изменение доведено до работы в процессе; ссылается на регламент там, где реальность давно другая.' },
+  { n: 6, name: 'Настойчивость и доведение до результата', role: 'Двигатель', why: 'изменение не заканчивается вместе с первым всплеском энтузиазма.',
+    ind: [['Продолжает при препятствиях', 'При нехватке ресурсов, критике или первых неудачах ищет другой путь, а не откладывает идею.'],
+          ['Доводит до конца', 'Завершает начатое, включая неяркую часть работы: инструкции, обучение коллег, закрепление нового порядка.'],
+          ['Отслеживает прогресс', 'Регулярно сверяет, что реально изменилось, и возвращает команду к договорённостям, когда они начинают размываться.']],
+    def: 'много энергии на старте и потеря интереса через несколько недель; упорство в варианте, который уже показал, что не работает. Настойчивость — не упрямство.' },
+  { n: 7, name: 'Открытость к изменениям и гибкость', role: 'Новатор', why: 'есть люди, которые первыми пробуют новое и запускают изменение.',
+    ind: [['Предлагает улучшения без запроса', 'Приносит идеи, пробует новые инструменты и способы работы, не дожидаясь указания.'],
+          ['Меняет подход, когда тот не работает', 'Признаёт, что план не сработал, и корректирует его, не защищая «своё» решение.'],
+          ['Конструктивно реагирует на перемены', 'При смене задач или сроков обсуждает, что делать дальше, а не только то, почему это плохо.']],
+    note: 'Критика изменения — не закрытость. Человек, который аргументированно называет риски, полезен команде.',
+    def: '«у нас так не принято», «мы это уже пробовали» — без разбора, почему не получилось.' },
+  { n: 8, name: 'Устойчивость под давлением', role: 'Опора', why: 'в кризисной точке команда продолжает работать, а не ищет виноватых.',
+    ind: [['Сохраняет самообладание', 'В напряжённой ситуации говорит спокойно, не переходит на обвинения и не срывается на коллег.'],
+          ['Принимает решения при неполной информации', 'Когда сроки горят, выбирает вариант и действует, а не откладывает решение и не перекладывает ответственность.'],
+          ['Поддерживает команду в трудный период', 'Помогает коллегам переключиться с тревоги на следующие конкретные шаги.']],
+    def: 'в кризис уходит в тень или ищет виноватых; принимает импульсивные решения, которые потом приходится отменять.' },
+];
+const ROLES = [
+  ['Стратег', '1', 'Понятно, зачем изменение и куда оно ведёт; риски видны заранее'],
+  ['Проводник', '2, 3', 'Люди понимают изменение и присоединяются к нему'],
+  ['Связной', '4', 'Изменение не застревает на стыках подразделений'],
+  ['Практик', '5', 'Идея превращается в работающий процесс'],
+  ['Двигатель', '6', 'Изменение доводится до конца и закрепляется'],
+  ['Новатор', '7', 'Кто-то первым пробует новое и показывает, что это работает'],
+  ['Опора', '8', 'Команда сохраняет работоспособность в кризисной точке'],
+];
+
+const EXAMPLE = {
+  names: ['Анна', 'Борис', 'Вера', 'Глеб', 'Дина', 'Егор', 'Жанна'],
+  v: [
+    [3,1,2,1,0,2,1],[3,2,1,2,1,1,2],[2,1,3,1,1,2,2],
+    [1,3,2,0,1,1,1],[2,3,1,1,2,3,1],[1,2,1,1,3,1,3],
+    [1,3,2,1,2,2,1],[2,2,3,1,2,1,2],[1,2,1,1,2,1,1],
+    [0,2,1,3,1,1,1],[1,1,1,2,1,1,1],[1,2,1,3,2,1,3],
+    [2,1,1,1,3,2,1],[3,1,1,1,1,1,0],[1,1,1,2,3,2,2],
+    [2,3,1,2,1,1,1],[1,2,1,1,3,3,1],[2,1,1,1,1,1,1],
+    [1,2,3,1,0,2,1],[1,1,3,2,1,1,2],['',1,3,1,1,1,0],
+    [2,1,2,1,3,1,1],[3,2,1,1,2,3,1],[1,1,2,'',1,1,1]
+  ],
+};
+
+const SHORT = { 1: 'Стратегия', 2: 'Влияние', 3: 'Общение', 4: 'Стыки', 5: 'Практика', 6: 'Упорство', 7: 'Открытость', 8: 'Стойкость' };
+const ROLE_COLS = { 'Стратег': [1], 'Проводник': [2, 3], 'Связной': [4], 'Практик': [5], 'Двигатель': [6], 'Новатор': [7], 'Опора': [8] };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nb = (t) => { const re = /(^|[\s«( ])([А-Яа-яЁё]{1,2}|для|без|при|что|как|или) /g; let p; do { p = t; t = t.replace(re, '$1$2 '); } while (p !== t); return t.replace(/ —/g, ' —'); };
+const N = 7;
+const ROWS = C.flatMap((c) => c.ind.map(([k]) => ({ c: c.n, k })));
+
+// роли
+document.getElementById('rolesList').innerHTML = ROLES.map(([r, , g]) => {
+  const cols = ROLE_COLS[r];
+  const strip = Array.from({ length: 8 }, (_, i) => `<i class="${cols.includes(i + 1) ? 'on' : ''}"></i>`).join('');
+  const crits = cols.map((n, i) => (i ? C[n - 1].name.toLowerCase() : C[n - 1].name)).join(', ');
+  return `<div class="role"><div><span class="name">${r}</span><span class="crits">${crits}</span></div><span class="gives">${nb(g)}</span></div>`;
+}).join('');
+
+// критерии
+document.getElementById('critList').innerHTML = C.map((c) => `
+  <article class="crit" id="c${c.n}">
+    <div>
+      <h3><span class="n">${c.n}.</span> ${c.name}</h3>
+      <p class="meta"><b>Роль:</b> ${c.role}. <b>Зачем команде:</b> ${nb(c.why)}</p>
+      <dl>${c.ind.map(([k, v]) => `<dt>${k}</dt><dd>${nb(v)}</dd>`).join('')}</dl>
+      ${c.note ? `<p class="extra"><b>Важно.</b> ${nb(c.note)}</p>` : ''}
+      <p class="extra def"><b>Признаки дефицита:</b> ${nb(c.def)}</p>
+    </div>
+  </article>`).join('');
+
+// логика покрытия
+function rowStatus(vals) {
+  const nums = vals.map((x) => (x === '' || x === 'nd' ? null : Number(x)));
+  if (nums.every((x) => x === null)) return 'none';
+  const threes = nums.map((x, i) => (x === 3 ? i : -1)).filter((i) => i >= 0);
+  if (!threes.length) return 'bad';
+  return threes.some((i) => nums.some((x, j) => j !== i && x !== null && x >= 2)) ? 'ok' : 'warn';
+}
+const LABEL = { ok: 'Закрыт', warn: 'Один сильный', bad: 'Никто не силён', none: 'Нет данных' };
+const nameOf = (names, j) => (names[j] || '').trim() || `Участник ${j + 1}`;
+const people = (vals, names) => ({ strong: vals.map((v, j) => (String(v) === '3' ? nameOf(names, j) : null)).filter(Boolean), backup: vals.map((v, j) => (String(v) === '2' ? nameOf(names, j) : null)).filter(Boolean) });
+const initials = (vals, names) => vals.map((v, j) => (String(v) === '3' ? (names[j] || `У${j + 1}`).trim().charAt(0).toUpperCase() || String(j + 1) : '')).filter(Boolean).slice(0, 2).join('');
+
+function renderMosaic(el, st) {
+  el.innerHTML = C.map((c, ci) => {
+    let ok = 0;
+    const cells = [0, 1, 2].map((k) => {
+      const r = ci * 3 + k; const s = rowStatus(st.v[r]); if (s === 'ok') ok++;
+      const who = people(st.v[r], st.names);
+      const label = `${ROWS[r].k}: ${LABEL[s].toLowerCase()}${who.strong.length ? `, сильные: ${who.strong.join(', ')}` : ''}`;
+      return `<a class="cell ${s}" href="#row${r}" title="${esc(label)}" aria-label="${esc(label)}"></a>`;
+    }).join('');
+    return `<div class="mrow"><span class="mname">${c.n}. ${c.name}</span><span class="mcells">${cells}</span><span class="mcount">${ok} из 3</span></div>`;
+  }).join('');
+}
+
+// данные
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const KEY = 'change-team-map-v3';
+const load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v && s.names && s.v.length === 24) return s; } catch (e) {} return null; };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+let state = load() || Object.assign(clone(EXAMPLE), { example: true });
+const storageOk = (() => { try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); return true; } catch (e) { return false; } })();
+
+
+function buildTable() {
+  let h = '<thead><tr><th class="sticky" scope="col">Индикатор</th>';
+  for (let j = 0; j < N; j++) h += `<th scope="col"><label for="nm${j}">Участник ${j + 1}</label><input id="nm${j}" data-n="${j}" value="${esc(state.names[j] || '')}" placeholder="Имя"><span class="pv" id="pn${j}"></span></th>`;
+  h += '<th scope="col">Покрытие</th></tr></thead><tbody>';
+  let r = 0;
+  C.forEach((c) => {
+    h += `<tr class="group"><th class="sticky" scope="rowgroup">${c.n}. ${c.name}<small>${c.role}</small></th><th colspan="${N + 1}"></th></tr>`;
+    c.ind.forEach(([k, d]) => {
+      h += `<tr id="row${r}"><td class="sticky"><details class="ind-d"><summary>${k}</summary><p class="desc">${nb(d)}</p></details></td>`;
+      for (let j = 0; j < N; j++) {
+        const v = state.v[r][j];
+        h += `<td><select id="s${r}_${j}" data-r="${r}" data-j="${j}" aria-label="${esc(k)}, участник ${j + 1}">
+          <option value=""${v === '' ? ' selected' : ''}>—</option>
+          <option value="nd"${v === 'nd' ? ' selected' : ''}>н/д</option>
+          ${[0, 1, 2, 3].map((x) => `<option value="${x}"${String(v) === String(x) ? ' selected' : ''}>${x}</option>`).join('')}
+        </select><span class="pv" id="pv${r}_${j}"></span></td>`;
+      }
+      h += `<td class="stc"><span class="st" id="st${r}"><i></i><span></span></span><span class="who" id="who${r}"></span></td></tr>`;
+      r++;
+    });
+  });
+  document.getElementById('mapTable').innerHTML = h + '</tbody>';
+}
+
+const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? b : c; };
+
+function refresh() {
+  const cnt = { ok: 0, warn: 0, bad: 0, none: 0 };
+  const todo = [];
+  ROWS.forEach((row, r) => {
+    const s = rowStatus(state.v[r]); cnt[s]++;
+    const el = document.getElementById('st' + r); el.className = 'st ' + s; el.lastChild.textContent = LABEL[s];
+    const w = people(state.v[r], state.names);
+    document.getElementById('who' + r).textContent = s === 'ok' ? `${w.strong.join(', ')}; страховка: ${w.backup.length ? w.backup.join(', ') : 'вторая тройка'}`
+      : s === 'warn' ? `${w.strong.join(', ')}; страховки нет` : '';
+    row.who = w;
+    for (let j = 0; j < N; j++) {
+      const sel = document.getElementById(`s${r}_${j}`);
+      sel.className = sel.value === '3' ? 'v3' : sel.value === '2' ? 'v2' : '';
+      const pv = document.getElementById(`pv${r}_${j}`);
+      pv.textContent = sel.value === '' ? '' : sel.value === 'nd' ? 'н/д' : sel.value;
+      pv.className = 'pv' + (sel.value === '3' ? ' v3' : '');
+    }
+    if (s === 'bad' || s === 'warn') todo.push({ ...row, s });
+  });
+  for (let j = 0; j < N; j++) document.getElementById('pn' + j).textContent = state.names[j] || `Участник ${j + 1}`;
+  document.getElementById('printDate').textContent = new Date().toLocaleDateString('ru-RU');
+  renderMosaic(document.getElementById('liveMosaic'), state);
+  const v = document.getElementById('verdict');
+  if (cnt.none === 24) v.textContent = 'Карта пуста. Впишите людей и поставьте оценки.';
+  else if (cnt.ok === 24) v.textContent = 'Команда закрывает все 24 индикатора.';
+  else v.textContent = `Команда закрывает ${cnt.ok} из 24. ${cnt.bad ? `В ${cnt.bad} ${plural(cnt.bad, 'индикаторе', 'индикаторах', 'индикаторах')} никто не силён` : 'Пробелов без сильного участника нет'}${cnt.warn ? `, ${cnt.warn} ${plural(cnt.warn, 'держится', 'держатся', 'держатся')} на одном человеке.` : '.'}`;
+  document.getElementById('sampleNote').style.display = state.example ? 'inline-block' : 'none';
+  const bad = todo.filter((x) => x.s === 'bad'), warn = todo.filter((x) => x.s === 'warn');
+  const item = (x, txt) => `<li><b>${esc(x.k)}</b> <span class="crit-ref">(${C[x.c - 1].name.toLowerCase()})</span>${txt ? ` — ${esc(txt)}` : ''}</li>`;
+  document.getElementById('todo').innerHTML = todo.length
+    ? `<h3>Что закрыть в первую очередь</h3>`
+      + (bad.length ? `<h4>Никто не силён</h4><p class="todo-hint">Нужен человек с этим поведением или наставник со стороны.</p><ul>${bad.map((x) => item(x)).join('')}</ul>` : '')
+      + (warn.length ? `<h4>Держится на одном человеке</h4><p class="todo-hint">Найдите второго с оценкой не ниже 2.</p><ul>${warn.map((x) => item(x, x.who.strong.join(', '))).join('')}</ul>` : '')
+    : (cnt.none === 24 ? '' : '<h3>Пробелов нет</h3><p>У каждого индикатора есть сильный участник и страховка.</p>');
+  renderMobile();
+}
+
+const touch = () => { state.example = false; save(); refresh(); };
+let mj = 0;
+const mOpen = new Set();
+const VALS = [['nd', 'н/д'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3']];
+function renderMobile() {
+  const pe = document.getElementById('mPeople'); if (!pe) return;
+  pe.innerHTML = Array.from({ length: N }, (_, j) => `<button type="button" role="tab" aria-selected="${j === mj}" data-j="${j}">${esc(nameOf(state.names, j))}</button>`).join('');
+  document.getElementById('mNameNum').textContent = mj + 1;
+  const ni = document.getElementById('mName'); if (document.activeElement !== ni) ni.value = state.names[mj] || '';
+  let r = 0, h = '';
+  C.forEach((c) => {
+    h += `<div class="m-group"><h4>${c.n}. ${c.name}</h4>`;
+    c.ind.forEach(([k, d]) => {
+      const v = String(state.v[r][mj]); const s = rowStatus(state.v[r]);
+      h += `<div class="m-row" id="mrow${r}"><details class="ind-d k" data-r="${r}"${mOpen.has(r) ? ' open' : ''}><summary>${k}</summary><p class="desc">${nb(d)}</p></details><div class="m-seg" role="group" aria-label="${esc(k)}">${VALS.map(([val, lab]) => `<button type="button" class="${val === '2' ? 'two' : ''}" data-r="${r}" data-v="${val}" aria-pressed="${v === val}">${lab}</button>`).join('')}</div><span class="st ${s}"><i></i><span>${LABEL[s]}</span></span></div>`;
+      r++;
+    });
+    h += '</div>';
+  });
+  document.getElementById('mList').innerHTML = h;
+}
+document.getElementById('liveMosaic').addEventListener('click', (e) => {
+  const a = e.target.closest('a.cell'); if (!a) return;
+  const r = a.getAttribute('href').slice(4);
+  if (getComputedStyle(document.querySelector('.table-scroll')).display === 'none') { e.preventDefault(); const el = document.getElementById('mrow' + r); if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+});
+document.getElementById('mPeople').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; mj = +b.dataset.j; renderMobile(); });
+document.getElementById('mName').addEventListener('input', (e) => { state.names[mj] = e.target.value; const d = document.getElementById('nm' + mj); if (d) d.value = e.target.value; touch(); });
+document.getElementById('mList').addEventListener('toggle', (e) => { const d = e.target; if (!d.matches || !d.matches('details[data-r]')) return; d.open ? mOpen.add(+d.dataset.r) : mOpen.delete(+d.dataset.r); }, true);
+document.getElementById('mList').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-r]'); if (!b) return;
+  const r = +b.dataset.r; const cur = String(state.v[r][mj]);
+  state.v[r][mj] = cur === b.dataset.v ? '' : b.dataset.v;
+  const sel = document.getElementById(`s${r}_${mj}`); if (sel) sel.value = state.v[r][mj];
+  touch();
+});
+document.getElementById('mapTable').addEventListener('change', (e) => { const s = e.target.closest('select'); if (!s) return; state.v[+s.dataset.r][+s.dataset.j] = s.value; touch(); });
+document.getElementById('mapTable').addEventListener('input', (e) => { const i = e.target.closest('input'); if (!i) return; state.names[+i.dataset.n] = i.value; touch(); });
+let undoState = null;
+document.getElementById('clearBtn').addEventListener('click', () => { undoState = clone(state); state = { names: Array(N).fill(''), v: ROWS.map(() => Array(N).fill('')), example: false }; save(); buildTable(); refresh(); flash('Карта очищена.', true); });
+document.getElementById('undoBtn').addEventListener('click', () => { if (!undoState) return; state = undoState; undoState = null; save(); buildTable(); refresh(); flash('Данные возвращены'); });
+document.getElementById('exampleBtn').addEventListener('click', () => { state = Object.assign(clone(EXAMPLE), { example: true }); save(); buildTable(); refresh(); flash('Пример восстановлен'); });
+document.getElementById('printBtn').addEventListener('click', () => { try { window.print(); } catch (e) {} flash('Если окно печати не открылось, откройте страницу в браузере напрямую и нажмите Ctrl+P'); });
+let ft; function flash(m, undo) { const s = document.getElementById('statusMsg'); const u = document.getElementById('undoBtn'); s.textContent = m; u.hidden = !undo; clearTimeout(ft); ft = setTimeout(() => { s.textContent = ''; u.hidden = true; }, undo ? 10000 : 3000); }
+
+function boot(data) {
+  if (data && Array.isArray(data.v) && data.v.length === 24 && Array.isArray(data.names)) state = data;
+  if (!storageOk) document.getElementById('storageNote').hidden = false;
+  buildTable(); refresh();
+}
+try { window.claude?.hot?.snapshot?.(() => state); } catch (e) {}
+if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
