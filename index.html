@@ -20,6 +20,8 @@
   --leaf: #CDEBD4;
   --gap: #B23A0C;
   --gap-soft: #FBE9E2;
+  --line-soft: #7A8B80;
+  --dash: #96D5A4;
   --display: "Unbounded", "Arial Black", sans-serif;
   --body: "Golos Text", "Segoe UI", Roboto, Arial, sans-serif;
   color-scheme: light;
@@ -59,15 +61,14 @@ p { margin: 0; }
 .mcount { font-size: 14px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .cell { height: 32px; border-radius: 3px; display: block; position: relative; }
 .cell.ok { background: var(--action); }
-.cell.warn { background: var(--leaf); }
-.cell.bad { background: var(--paper); box-shadow: inset 0 0 0 2px var(--gap); }
-.cell.bad::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--gap) 50%, transparent calc(50% + 1px)); opacity: .5; border-radius: 3px; }
+.cell.warn { background: var(--dash); }
+.cell.bad { background: var(--paper); border: 2px dashed var(--dash); }
 .cell.none { background: var(--mist); }
 @media (pointer: coarse) { .mcells { grid-template-columns: repeat(3, 40px); } .cell { height: 40px; } }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 14px; font-size: 14px; color: var(--ink-soft); }
 .legend span { display: inline-flex; align-items: center; gap: 8px; }
-.legend i { width: 14px; height: 14px; border-radius: 2px; display: inline-block; }
-.legend .ok i { background: var(--action); } .legend .warn i { background: var(--leaf); } .legend .bad i { box-shadow: inset 0 0 0 2px var(--gap); }
+.legend i { width: 16px; height: 16px; box-sizing: border-box; border-radius: 2px; display: inline-block; }
+.legend .ok i { background: var(--action); } .legend .warn i { background: var(--dash); } .legend .bad i { border: 2px dashed var(--dash); }
 
 /* ---------- разделы: заголовок слева, содержание справа ---------- */
 .part { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 48px; padding: 64px 0; scroll-margin-top: 16px; }
@@ -136,14 +137,12 @@ table.map tr.group th { padding-top: 22px; font: 700 14px/1.2 var(--display); co
 table.map tr.group th small { font: 500 13px var(--body); color: var(--ink-soft); margin-left: 8px; }
 table.map tbody td { border-bottom: 1px solid var(--mist); }
 table.map select { width: 100%; min-width: 64px; min-height: 38px; font: 600 15px var(--body); padding: 4px 6px; border: 1px solid var(--leaf); border-radius: 3px; background: var(--paper); color: var(--ink); font-variant-numeric: tabular-nums; cursor: pointer; }
-table.map select.v3 { background: var(--action); border-color: var(--action); color: #fff; }
-table.map select.v2 { background: var(--leaf); border-color: var(--leaf); }
 .st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; }
-.st i { width: 14px; height: 14px; border-radius: 2px; display: inline-block; flex: none; }
-.st.ok i { background: var(--action); } .st.warn i { background: var(--leaf); } .st.bad i { box-shadow: inset 0 0 0 2px var(--gap); } .st.none i { background: var(--mist); }
+.st i { width: 14px; height: 14px; box-sizing: border-box; border-radius: 2px; display: inline-block; flex: none; }
+.st.ok i { background: var(--action); } .st.warn i { background: var(--dash); } .st.bad i { border: 2px dashed var(--dash); } .st.none i { background: var(--mist); }
 .stc { min-width: 200px; }
 .who { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; line-height: 1.35; }
-.st.bad { color: var(--gap); } .st.none { color: var(--ink-soft); }
+.st.bad { color: var(--gap); } .st.warn { color: var(--ink); } .st.none { color: var(--ink-soft); }
 .map-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 22px; }
 .status-msg { font-size: 14px; font-weight: 600; color: var(--action); }
 .linkbtn { background: none; border: 0; padding: 12px 4px; font: 600 14px var(--body); color: var(--action); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -162,7 +161,7 @@ table.map select.v2 { background: var(--leaf); border-color: var(--leaf); }
 .sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
 .sources b { font-weight: 600; }
 footer { padding: 32px 0 48px; border-top: 1px solid var(--leaf); color: var(--ink-soft); font-size: 14px; }
-.scale-inline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 36px 0 12px; max-width: 980px; }
+.scale-inline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 36px 0 12px; max-width: 980px; }
 .scale-inline div { border-left: 3px solid var(--leaf); padding: 2px 0 2px 10px; }
 .scale-inline dt { font: 700 18px/1.2 var(--display); color: var(--action); }
 .scale-inline dd { margin: 2px 0 0; font-size: 14px; color: var(--ink-soft); line-height: 1.35; }
@@ -181,10 +180,9 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
 .m-group h4 { font: 700 15px/1.3 var(--display); margin: 0 0 4px; }
 .m-row { scroll-margin-top: 12px; padding: 12px 0; border-bottom: 1px solid var(--mist); }
 .m-row .k { font-size: 15.5px; margin-bottom: 8px; }
-.m-seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.m-seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .m-seg button { min-height: 44px; border: 1px solid var(--leaf); border-radius: 4px; background: var(--paper); color: var(--ink); font: 600 16px var(--body); font-variant-numeric: tabular-nums; }
 .m-seg button[aria-pressed="true"] { background: var(--action); border-color: var(--action); color: #fff; }
-.m-seg button.two[aria-pressed="true"] { background: var(--leaf); border-color: var(--action); color: var(--ink); }
 .m-row .st { margin-top: 8px; font-size: 13px; }
 
 @media (max-width: 960px) {
@@ -236,6 +234,8 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
   .st { font-size: 9px; } .st i { width: 9px; height: 9px; } .who { display: inline; font-size: 8.5px; margin: 0 0 0 4px; } .stc { min-width: 0; white-space: nowrap; }
   .todo { break-before: page; max-width: none; }
   .todo li { font-size: 12px; }
+  .st.warn i { background: var(--dash); box-shadow: inset 0 0 0 1px var(--ink-soft); }
+  .st.bad i { border: 1.5px dashed var(--ink-soft); }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
@@ -254,8 +254,8 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
   <main id="top">
     <section class="hero">
       <div>
-        <h1>Ни у&nbsp;кого нет всех 24&nbsp;качеств. У&nbsp;команды они есть.</h1>
-        <p class="lead">Модель для подбора команды, которая внедряет изменения: 8 критериев, 24 поведенческих индикатора и карта, которая показывает, где у команды пробелы.</p>
+        <h1>Команда изменений</h1>
+        <p class="lead">Ни у&nbsp;кого нет всех 24&nbsp;поведенческих индикаторов, и&nbsp;это не нужно. Важно, чтобы вместе их закрывала команда. Модель помогает подобрать такую команду: 8 критериев, 24 индикатора и карта, которая показывает, где у команды пробелы.</p>
         <div class="actions">
           <a class="btn" href="#map">Заполнить карту своей команды</a>
           <a class="btn quiet" href="#criteria">Посмотреть критерии</a>
@@ -293,9 +293,9 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
     </section>
 
     <section class="part" id="map">
-      <header><h2>Карта команды</h2><p>До семи человек. Ставьте оценку по конкретному эпизоду: когда вы видели это поведение и что человек сделал. Надёжнее, если оценки дают 2–3 человека: руководитель, коллега из смежного подразделения и сам участник. Данные остаются только в вашем браузере.</p></header>
+      <header><h2>Карта команды</h2><p>До шести человек. Ставьте оценку по конкретному эпизоду: когда вы видели это поведение и что человек сделал. Надёжнее, если оценки дают 2–3 человека: руководитель, коллега из смежного подразделения и сам участник. Данные остаются только в вашем браузере.</p></header>
       <div class="body-col wide">
-        <p class="print-only">Карта команды изменений. Дата: <span id="printDate"></span>. Шкала: 0 — не проявляется, 1 — эпизодически, 2 — устойчиво, 3 — образец, н/д — не было случая увидеть. Индикатор закрыт, если у одного человека оценка 3, а у другого — не ниже 2.</p>
+        <p class="print-only">Карта команды изменений. Дата: <span id="printDate"></span>. Шкала: 0 — не проявляется, 1 — эпизодически, 2 — устойчиво, н/д — не было случая увидеть. Индикатор закрыт, если устойчиво его проявляют хотя бы двое.</p>
         <div class="map-top">
           <div>
             <p class="verdict" id="verdict" aria-live="polite"></p>
@@ -305,17 +305,16 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
           </div>
           <div>
             <div class="mosaic" id="liveMosaic" aria-label="Покрытие индикаторов вашей командой"></div>
-            <div class="legend"><span class="ok"><i></i>закрыт</span><span class="warn"><i></i>держится на одном человеке</span><span class="bad"><i></i>никто не силён</span></div>
+            <div class="legend"><span class="ok"><i></i>закрыт: двое и больше</span><span class="warn"><i></i>на одном человеке</span><span class="bad"><i></i>пробел: никого</span></div>
           </div>
         </div>
                 <dl class="scale-inline" aria-label="Шкала оценки">
           <div><dt>0</dt><dd>не проявляется</dd></div>
           <div><dt>1</dt><dd>эпизодически, в простых ситуациях</dd></div>
-          <div><dt>2</dt><dd>устойчиво, в том числе в сложных</dd></div>
-          <div><dt>3</dt><dd>образец, на человека опираются</dd></div>
+          <div><dt>2</dt><dd>устойчиво, в том числе в сложных ситуациях</dd></div>
           <div><dt>н/д</dt><dd>не было случая увидеть</dd></div>
         </dl>
-        <p class="rule-line">Индикатор закрыт, если у одного человека оценка 3, а у другого — не ниже 2.</p>
+        <p class="rule-line">Индикатор закрыт, если устойчиво (на 2) его проявляют хотя бы двое: тогда команда не зависит от одного человека.</p>
         <div class="table-scroll"><table class="map" id="mapTable"></table></div>
         <div class="m-editor" id="mEditor">
           <p class="m-step">Кого оцениваете</p>
@@ -339,12 +338,12 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
       <header><h2>Что делать с результатом</h2></header>
       <div class="body-col">
         <ol class="steps">
-          <li><b>Обсудите пробелы,</b> начиная со списка «Что закрыть в первую очередь». Сначала индикаторы, в которых никто не силён, потом те, что держатся на одном человеке.</li>
+          <li><b>Обсудите пробелы,</b> начиная со списка «Что закрыть в первую очередь». Сначала пробелы, потом то, что держится на одном человеке.</li>
           <li><b>Распределите людей по этапам:</b> кто запускает изменение, кто подключается на закреплении.</li>
-          <li><b>Закройте пробелы:</b> добавьте в команду человека с оценкой 3 по нужному индикатору, поставьте в пару сильного и развивающегося участника или привлеките внешнего эксперта либо спонсора.</li>
+          <li><b>Закройте пробелы:</b> добавьте в команду человека, который устойчиво проявляет нужное поведение, поставьте в пару того, у кого 2, с тем, у кого 1, или привлеките внешнего эксперта либо спонсора.</li>
         </ol>
         <ul class="rules">
-          <li><b>Один сильный участник — узкое место.</b> Если индикатор закрывает один человек, на нём замыкается слишком много решений и контактов.</li>
+          <li><b>Индикатор на одном человеке — узкое место.</b> Если этот человек уйдёт, заболеет или перегрузится, индикатор станет пробелом, а на нём самом замыкается слишком много решений и контактов.</li>
           <li><b>Правило покрытия — рабочий ориентир,</b> а не норма. Корректируйте его под масштаб изменения.</li>
         </ul>
       </div>
@@ -420,16 +419,16 @@ const ROLES = [
 ];
 
 const EXAMPLE = {
-  names: ['Анна', 'Борис', 'Вера', 'Глеб', 'Дина', 'Егор', 'Жанна'],
+  names: ['Анна', 'Борис', 'Вера', 'Глеб', 'Дина', 'Егор'],
   v: [
-    [3,1,2,1,0,2,1],[3,2,1,2,1,1,2],[2,1,3,1,1,2,2],
-    [1,3,2,0,1,1,1],[2,3,1,1,2,3,1],[1,2,1,1,3,1,3],
-    [1,3,2,1,2,2,1],[2,2,3,1,2,1,2],[1,2,1,1,2,1,1],
-    [0,2,1,3,1,1,1],[1,1,1,2,1,1,1],[1,2,1,3,2,1,3],
-    [2,1,1,1,3,2,1],[3,1,1,1,1,1,0],[1,1,1,2,3,2,2],
-    [2,3,1,2,1,1,1],[1,2,1,1,3,3,1],[2,1,1,1,1,1,1],
-    [1,2,3,1,0,2,1],[1,1,3,2,1,1,2],['',1,3,1,1,1,0],
-    [2,1,2,1,3,1,1],[3,2,1,1,2,3,1],[1,1,2,'',1,1,1]
+    [2,1,2,1,0,2],[2,2,1,2,1,1],[2,1,2,1,1,2],
+    [1,2,2,0,1,1],[2,2,1,1,2,2],[1,2,1,1,2,1],
+    [1,2,2,1,2,2],[2,2,2,1,2,1],[1,1,'nd',1,1,0],
+    [0,2,1,2,1,1],[1,1,1,1,0,1],[1,2,1,2,2,1],
+    [2,1,1,1,2,2],[2,1,1,1,1,1],[1,1,1,2,2,2],
+    [2,2,1,2,1,1],[1,2,1,1,2,2],[2,1,1,1,1,1],
+    [1,2,2,1,0,2],[1,1,2,2,1,1],['',1,2,1,1,1],
+    [2,1,2,1,2,1],[2,2,1,1,2,2],[1,1,2,'',1,1]
   ],
 };
 
@@ -437,7 +436,7 @@ const SHORT = { 1: 'Стратегия', 2: 'Влияние', 3: 'Общение
 const ROLE_COLS = { 'Стратег': [1], 'Проводник': [2, 3], 'Связной': [4], 'Практик': [5], 'Двигатель': [6], 'Новатор': [7], 'Опора': [8] };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const nb = (t) => { const re = /(^|[\s«( ])([А-Яа-яЁё]{1,2}|для|без|при|что|как|или) /g; let p; do { p = t; t = t.replace(re, '$1$2 '); } while (p !== t); return t.replace(/ —/g, ' —'); };
-const N = 7;
+const N = 6;
 const ROWS = C.flatMap((c) => c.ind.map(([k]) => ({ c: c.n, k })));
 
 // роли
@@ -460,18 +459,19 @@ document.getElementById('critList').innerHTML = C.map((c) => `
     </div>
   </article>`).join('');
 
-// логика покрытия
+// логика покрытия: считаем людей с оценкой 2
 function rowStatus(vals) {
   const nums = vals.map((x) => (x === '' || x === 'nd' ? null : Number(x)));
   if (nums.every((x) => x === null)) return 'none';
-  const threes = nums.map((x, i) => (x === 3 ? i : -1)).filter((i) => i >= 0);
-  if (!threes.length) return 'bad';
-  return threes.some((i) => nums.some((x, j) => j !== i && x !== null && x >= 2)) ? 'ok' : 'warn';
+  const k = nums.filter((x) => x === 2).length;
+  return k >= 2 ? 'ok' : k === 1 ? 'warn' : 'bad';
 }
-const LABEL = { ok: 'Закрыт', warn: 'Один сильный', bad: 'Никто не силён', none: 'Нет данных' };
+const LABEL = { ok: 'Закрыт', warn: 'На одном человеке', bad: 'Пробел', none: 'Нет данных' };
 const nameOf = (names, j) => (names[j] || '').trim() || `Участник ${j + 1}`;
-const people = (vals, names) => ({ strong: vals.map((v, j) => (String(v) === '3' ? nameOf(names, j) : null)).filter(Boolean), backup: vals.map((v, j) => (String(v) === '2' ? nameOf(names, j) : null)).filter(Boolean) });
-const initials = (vals, names) => vals.map((v, j) => (String(v) === '3' ? (names[j] || `У${j + 1}`).trim().charAt(0).toUpperCase() || String(j + 1) : '')).filter(Boolean).slice(0, 2).join('');
+const people = (vals, names) => {
+  const pick = (f) => vals.map((v, j) => (f(String(v)) ? nameOf(names, j) : null)).filter(Boolean);
+  return { two: pick((v) => v === '2'), one: pick((v) => v === '1'), zero: pick((v) => v === '0'), nd: pick((v) => v === 'nd' || v === '') };
+};
 
 function renderMosaic(el, st) {
   el.innerHTML = C.map((c, ci) => {
@@ -479,7 +479,7 @@ function renderMosaic(el, st) {
     const cells = [0, 1, 2].map((k) => {
       const r = ci * 3 + k; const s = rowStatus(st.v[r]); if (s === 'ok') ok++;
       const who = people(st.v[r], st.names);
-      const label = `${ROWS[r].k}: ${LABEL[s].toLowerCase()}${who.strong.length ? `, сильные: ${who.strong.join(', ')}` : ''}`;
+      const label = `${ROWS[r].k}: ${LABEL[s].toLowerCase()}${who.two.length ? `, устойчиво: ${who.two.join(', ')}` : ''}`;
       return `<a class="cell ${s}" href="#row${r}" title="${esc(label)}" aria-label="${esc(label)}"></a>`;
     }).join('');
     return `<div class="mrow"><span class="mname">${c.n}. ${c.name}</span><span class="mcells">${cells}</span><span class="mcount">${ok} из 3</span></div>`;
@@ -488,7 +488,7 @@ function renderMosaic(el, st) {
 
 // данные
 const clone = (o) => JSON.parse(JSON.stringify(o));
-const KEY = 'change-team-map-v3';
+const KEY = 'change-team-map-v5';
 const load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v && s.names && s.v.length === 24) return s; } catch (e) {} return null; };
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
 let state = load() || Object.assign(clone(EXAMPLE), { example: true });
@@ -509,7 +509,7 @@ function buildTable() {
         h += `<td><select id="s${r}_${j}" data-r="${r}" data-j="${j}" aria-label="${esc(k)}, участник ${j + 1}">
           <option value=""${v === '' ? ' selected' : ''}>—</option>
           <option value="nd"${v === 'nd' ? ' selected' : ''}>н/д</option>
-          ${[0, 1, 2, 3].map((x) => `<option value="${x}"${String(v) === String(x) ? ' selected' : ''}>${x}</option>`).join('')}
+          ${[0, 1, 2].map((x) => `<option value="${x}"${String(v) === String(x) ? ' selected' : ''}>${x}</option>`).join('')}
         </select><span class="pv" id="pv${r}_${j}"></span></td>`;
       }
       h += `<td class="stc"><span class="st" id="st${r}"><i></i><span></span></span><span class="who" id="who${r}"></span></td></tr>`;
@@ -528,17 +528,17 @@ function refresh() {
     const s = rowStatus(state.v[r]); cnt[s]++;
     const el = document.getElementById('st' + r); el.className = 'st ' + s; el.lastChild.textContent = LABEL[s];
     const w = people(state.v[r], state.names);
-    document.getElementById('who' + r).textContent = s === 'ok' ? `${w.strong.join(', ')}; страховка: ${w.backup.length ? w.backup.join(', ') : 'вторая тройка'}`
-      : s === 'warn' ? `${w.strong.join(', ')}; страховки нет` : '';
+    document.getElementById('who' + r).textContent = s === 'ok' ? `устойчиво: ${w.two.join(', ')}`
+      : s === 'warn' ? `только ${w.two[0]}`
+      : s === 'bad' ? (w.one.length ? `эпизодически: ${w.one.length > 3 ? w.one.slice(0, 3).join(', ') + ' и ещё ' + (w.one.length - 3) : w.one.join(', ')}` : 'ни у кого нет даже эпизодов') : '';
     row.who = w;
     for (let j = 0; j < N; j++) {
       const sel = document.getElementById(`s${r}_${j}`);
-      sel.className = sel.value === '3' ? 'v3' : sel.value === '2' ? 'v2' : '';
       const pv = document.getElementById(`pv${r}_${j}`);
       pv.textContent = sel.value === '' ? '' : sel.value === 'nd' ? 'н/д' : sel.value;
-      pv.className = 'pv' + (sel.value === '3' ? ' v3' : '');
+      pv.className = 'pv';
     }
-    if (s === 'bad' || s === 'warn') todo.push({ ...row, s });
+    if (s === 'bad' || s === 'warn' || w.zero.length) todo.push({ ...row, s });
   });
   for (let j = 0; j < N; j++) document.getElementById('pn' + j).textContent = state.names[j] || `Участник ${j + 1}`;
   document.getElementById('printDate').textContent = new Date().toLocaleDateString('ru-RU');
@@ -546,22 +546,32 @@ function refresh() {
   const v = document.getElementById('verdict');
   if (cnt.none === 24) v.textContent = 'Карта пуста. Впишите людей и поставьте оценки.';
   else if (cnt.ok === 24) v.textContent = 'Команда закрывает все 24 индикатора.';
-  else v.textContent = `Команда закрывает ${cnt.ok} из 24. ${cnt.bad ? `В ${cnt.bad} ${plural(cnt.bad, 'индикаторе', 'индикаторах', 'индикаторах')} никто не силён` : 'Пробелов без сильного участника нет'}${cnt.warn ? `, ${cnt.warn} ${plural(cnt.warn, 'держится', 'держатся', 'держатся')} на одном человеке.` : '.'}`;
+  else { const parts = []; if (cnt.warn) parts.push(`${cnt.warn} ${plural(cnt.warn, 'держится', 'держатся', 'держатся')} на одном человеке`); if (cnt.bad) parts.push(`${cnt.bad} ${plural(cnt.bad, 'пробел', 'пробела', 'пробелов')}`); if (cnt.none) parts.push(`по ${cnt.none} нет данных`);
+    const rest = cnt.warn + cnt.bad + cnt.none;
+    v.textContent = `Команда закрывает ${cnt.ok} из 24.${rest ? ` Остальные ${rest}: ${parts.join(', ')}.` : ''}`; }
   document.getElementById('sampleNote').style.display = state.example ? 'inline-block' : 'none';
-  const bad = todo.filter((x) => x.s === 'bad'), warn = todo.filter((x) => x.s === 'warn');
-  const item = (x, txt) => `<li><b>${esc(x.k)}</b> <span class="crit-ref">(${C[x.c - 1].name.toLowerCase()})</span>${txt ? ` — ${esc(txt)}` : ''}</li>`;
-  document.getElementById('todo').innerHTML = todo.length
+  const bad = todo.filter((x) => x.s === 'bad'), warn = todo.filter((x) => x.s === 'warn'), zero = todo.filter((x) => x.who.zero.length);
+  const few = (arr) => (arr.length > 3 ? `${arr.slice(0, 3).join(', ')} и ещё ${arr.length - 3}` : arr.join(', '));
+  const ref = (x) => `<b>${esc(x.k)}</b> <span class="crit-ref">(${C[x.c - 1].name.toLowerCase()})</span>`;
+  const ndNote = (x) => (x.who.nd.length && x.who.nd.length < N ? ` Нет данных по: ${x.who.nd.join(', ')} — уточните, прежде чем искать человека со стороны.` : '');
+  const badItem = (x) => `<li>${ref(x)} — ${x.who.one.length ? `ближе всех: ${esc(few(x.who.one))} (эпизодически).` : 'эпизодов нет ни у кого.'}${esc(ndNote(x))}</li>`;
+  const warnItem = (x) => `<li>${ref(x)} — держится на: ${esc(x.who.two[0])}.${x.who.one.length ? ` Кандидаты во вторые: ${esc(few(x.who.one))}.` : ''}</li>`;
+  const byPerson = {}; zero.forEach((x) => x.who.zero.forEach((p) => { (byPerson[p] = byPerson[p] || []).push(x.k.charAt(0).toLowerCase() + x.k.slice(1)); }));
+  const main = bad.length || warn.length;
+  document.getElementById('todo').innerHTML = (main
     ? `<h3>Что закрыть в первую очередь</h3>`
-      + (bad.length ? `<h4>Никто не силён</h4><p class="todo-hint">Нужен человек с этим поведением или наставник со стороны.</p><ul>${bad.map((x) => item(x)).join('')}</ul>` : '')
-      + (warn.length ? `<h4>Держится на одном человеке</h4><p class="todo-hint">Найдите второго с оценкой не ниже 2.</p><ul>${warn.map((x) => item(x, x.who.strong.join(', '))).join('')}</ul>` : '')
-    : (cnt.none === 24 ? '' : '<h3>Пробелов нет</h3><p>У каждого индикатора есть сильный участник и страховка.</p>');
+      + (bad.length ? `<h4>Пробелы</h4><p class="todo-hint">Никто не проявляет это поведение устойчиво. Развивайте тех, у кого оно уже бывает, или ищите человека со стороны.</p><ul>${bad.map(badItem).join('')}</ul>` : '')
+      + (warn.length ? `<h4>Держится на одном человеке</h4><p class="todo-hint">Подготовьте второго: начните с тех, у кого это поведение уже бывает.</p><ul>${warn.map(warnItem).join('')}</ul>` : '')
+    : (cnt.none === 24 ? '' : '<h3>Пробелов нет</h3><p>Каждый индикатор устойчиво проявляют хотя бы двое.</p>'))
+    + (zero.length && cnt.none !== 24 ? `<h4>Признаки дефицита</h4><p class="todo-hint">У этих людей поведение не проявляется или заметно обратное. На покрытие это не влияет, но в команде изменений стоит это учитывать.</p><ul>${Object.entries(byPerson).map(([p, ks]) => `<li><b>${esc(p)}</b> — ${esc(ks.join('; '))}</li>`).join('')}</ul>` : '');
   renderMobile();
+  if (typeof nbsp === 'function') { nbsp(document.getElementById('map')); }
 }
 
 const touch = () => { state.example = false; save(); refresh(); };
 let mj = 0;
 const mOpen = new Set();
-const VALS = [['nd', 'н/д'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3']];
+const VALS = [['nd', 'н/д'], ['0', '0'], ['1', '1'], ['2', '2']];
 function renderMobile() {
   const pe = document.getElementById('mPeople'); if (!pe) return;
   pe.innerHTML = Array.from({ length: N }, (_, j) => `<button type="button" role="tab" aria-selected="${j === mj}" data-j="${j}">${esc(nameOf(state.names, j))}</button>`).join('');
@@ -603,10 +613,19 @@ document.getElementById('exampleBtn').addEventListener('click', () => { state = 
 document.getElementById('printBtn').addEventListener('click', () => { try { window.print(); } catch (e) {} flash('Если окно печати не открылось, откройте страницу в браузере напрямую и нажмите Ctrl+P'); });
 let ft; function flash(m, undo) { const s = document.getElementById('statusMsg'); const u = document.getElementById('undoBtn'); s.textContent = m; u.hidden = !undo; clearTimeout(ft); ft = setTimeout(() => { s.textContent = ''; u.hidden = true; }, undo ? 10000 : 3000); }
 
+const NB_RE = /(^|[\s«(\u00A0])([А-Яа-яЁёA-Za-z]{1,2}|для|без|под|над|при|про|что|как|или|чем|где|его|это|Для|Без|При|Что|Как) /g;
+function nbText(s) { let p; do { p = s; s = s.replace(NB_RE, '$1$2\u00A0'); } while (p !== s); return s.replace(/ —/g, '\u00A0—').replace(/(\d) (?=[А-Яа-яЁё])/g, '$1\u00A0').replace(/(\d)–(\d)/g, '$1\u2060–\u2060$2'); }
+function nbsp(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && /^(SCRIPT|STYLE|OPTION|TEXTAREA)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+  const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach((n) => { const v = nbText(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; });
+}
 function boot(data) {
   if (data && Array.isArray(data.v) && data.v.length === 24 && Array.isArray(data.names)) state = data;
+  state.v = state.v.map((row) => row.slice(0, N).map((x) => (String(x) === '3' ? '2' : x)));
+  state.names = state.names.slice(0, N);
   if (!storageOk) document.getElementById('storageNote').hidden = false;
-  buildTable(); refresh();
+  buildTable(); refresh(); nbsp(document.body);
 }
 try { window.claude?.hot?.snapshot?.(() => state); } catch (e) {}
 if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
