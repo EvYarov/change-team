@@ -147,6 +147,14 @@ table.map select { width: 100%; min-width: 64px; min-height: 38px; font: 600 15p
 .stc { min-width: 200px; }
 .who { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; line-height: 1.35; }
 .st.bad { color: var(--gap); } .st.warn { color: var(--ink); } .st.none { color: var(--ink-soft); }
+.mapbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 16px; }
+.mapbar.is-example { background: var(--gap-soft); border-left: 4px solid var(--gap); padding: 14px 16px; border-radius: 4px; }
+.mapbar p { margin: 0; font-size: 15px; color: var(--ink); flex: 1 1 260px; }
+.mapbar.is-own p { color: var(--ink-soft); flex: 0 1 auto; }
+.mapbar .linkbtn { padding: 10px 4px; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 40; display: flex; align-items: center; gap: 12px; max-width: calc(100% - 32px); padding: 10px 18px; border-radius: 6px; background: var(--ink); color: #fff; font: 600 15px var(--body); box-shadow: 0 4px 16px rgba(15,61,34,.25); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.toast.show { opacity: 1; pointer-events: auto; }
+.toast .linkbtn { color: var(--leaf); padding: 8px 4px; }
 .map-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 22px; }
 .status-msg { font-size: 14px; font-weight: 600; color: var(--action); }
 .linkbtn { background: none; border: 0; padding: 12px 4px; font: 600 14px var(--body); color: var(--action); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -232,7 +240,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
 @media print {
   @page { size: A4 landscape; margin: 10mm; }
   body { font-size: 11px; }
-  .top, .hero, .part:not(#map), footer, .map-actions, .sample-note, .scroll-hint, .map-top .verdict-sub { display: none !important; }
+  .top, .hero, .part:not(#map), footer, .map-actions, .mapbar, .toast, .sample-note, .scroll-hint, .map-top .verdict-sub { display: none !important; }
   #map { display: block; padding: 0; border: 0; }
   #map > header h2 { position: static; font-size: 18px; }
   #map > header p { display: none; }
@@ -338,7 +346,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
             <p class="verdict" id="verdict" aria-live="polite"></p>
             <p class="verdict-sub">Сетка обновляется, пока вы ставите оценки. Три клетки в строке — три вида поведения внутри критерия. Нажмите на клетку, чтобы перейти к строке с именами.</p>
             <span class="sample-note" id="storageNote" hidden>Этот браузер не сохраняет данные страницы: после перезагрузки карта вернётся к примеру. Чтобы сохранить результат, распечатайте карту.</span>
-            <span class="sample-note" id="sampleNote">Сейчас заполнен пример. Впишите своих людей или очистите карту.</span>
+            <div class="mapbar" id="mapBar" aria-live="polite"></div>
           </div>
           <div>
             <div class="mosaic" id="liveMosaic" aria-label="Покрытие поведения вашей командой"></div>
@@ -363,9 +371,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
         <div class="map-actions">
           <button class="btn" type="button" id="printBtn">Распечатать карту</button>
           <button class="btn quiet" type="button" id="clearBtn">Очистить карту</button>
-          <button class="btn quiet" type="button" id="exampleBtn">Вернуть пример</button>
-          <span class="status-msg" id="statusMsg" role="status"></span>
-          <button class="linkbtn" type="button" id="undoBtn" hidden>Вернуть данные</button>
+          <button class="btn quiet" type="button" id="exampleBtn">Показать пример</button>
         </div>
         <div class="todo" id="todo"></div>
       </div>
@@ -398,6 +404,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
     </section>
   </main>
   <a class="totop" id="toTop" href="#top">↑ Наверх</a>
+  <div class="toast" id="toast" role="status"><span id="statusMsg"></span><button class="linkbtn" type="button" id="undoBtn" hidden>Вернуть данные</button></div>
 
   <footer>T×DG (ООО «ТД ГРУП»)</footer>
 </div>
@@ -612,9 +619,11 @@ function refresh() {
   else { const parts = []; if (cnt.warn) parts.push(`${cnt.warn} ${plural(cnt.warn, 'держится', 'держатся', 'держатся')} на одном человеке`); if (cnt.bad) parts.push(`${cnt.bad} ${plural(cnt.bad, 'пробел', 'пробела', 'пробелов')}`); if (cnt.none) parts.push(`по ${cnt.none} нет данных`);
     const rest = cnt.warn + cnt.bad + cnt.none;
     v.textContent = `Команда закрывает ${cnt.ok} из 24.${rest ? ` Остальные ${rest}: ${parts.join(', ')}.` : ''}`; }
-  const sn = document.getElementById('sampleNote');
-  sn.textContent = state.example ? 'Сейчас заполнен пример. Впишите своих людей или очистите карту.' : (storageOk ? 'Данные сохраняются в этом браузере.' : '');
-  sn.classList.toggle('quiet-note', !state.example);
+  const mb = document.getElementById('mapBar');
+  mb.className = 'mapbar ' + (state.example ? 'is-example' : 'is-own');
+  mb.innerHTML = state.example
+    ? '<p><b>Сейчас на карте пример.</b> Чтобы оценить свою команду, очистите его — имена и оценки можно будет вписать сразу.</p><button class="btn" type="button" data-act="clear">Очистить и заполнить свою команду</button>'
+    : `<p>${storageOk ? 'Данные сохраняются в этом браузере.' : ''}</p><button class="linkbtn" type="button" data-act="clear">Очистить карту</button><button class="linkbtn" type="button" data-act="example">Показать пример</button>`;
   const bad = todo.filter((x) => x.s === 'bad'), warn = todo.filter((x) => x.s === 'warn'), zero = todo.filter((x) => x.who.zero.length);
   const few = (arr) => (arr.length > 3 ? `${arr.slice(0, 3).join(', ')} и ещё ${arr.length - 3}` : arr.join(', '));
   const ref = (x) => `<b>${esc(x.k)}</b> <span class="crit-ref">(${C[x.c - 1].name.toLowerCase()})</span>`;
@@ -688,7 +697,12 @@ document.getElementById('clearBtn').addEventListener('click', () => { undoState 
 document.getElementById('undoBtn').addEventListener('click', () => { if (!undoState) return; state = undoState; undoState = null; save(); buildTable(); refresh(); flash('Данные возвращены'); });
 document.getElementById('exampleBtn').addEventListener('click', () => { state = Object.assign(clone(EXAMPLE), { example: true }); save(); buildTable(); refresh(); flash('Пример восстановлен'); });
 document.getElementById('printBtn').addEventListener('click', () => { try { window.print(); } catch (e) {} flash('Если окно печати не открылось, откройте страницу в браузере напрямую и нажмите Ctrl+P'); });
-let ft; function flash(m, undo) { const s = document.getElementById('statusMsg'); const u = document.getElementById('undoBtn'); s.textContent = m; u.hidden = !undo; clearTimeout(ft); ft = setTimeout(() => { s.textContent = ''; u.hidden = true; }, undo ? 10000 : 3000); }
+let ft; function flash(m, undo) { const t = document.getElementById('toast'); const s = document.getElementById('statusMsg'); const u = document.getElementById('undoBtn'); s.textContent = m; u.hidden = !undo; t.classList.add('show'); clearTimeout(ft); ft = setTimeout(() => { t.classList.remove('show'); u.hidden = true; }, undo ? 10000 : 3000); }
+document.getElementById('mapBar').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  if (b.dataset.act === 'clear') { document.getElementById('clearBtn').click(); const f = document.getElementById('nm0') || document.getElementById('mName'); if (f && f.offsetParent) f.focus({ preventScroll: true }); }
+  if (b.dataset.act === 'example') document.getElementById('exampleBtn').click();
+});
 
 const NB_RE = /(^|[\s«(\u00A0])([А-Яа-яЁёA-Za-z]{1,2}|для|без|под|над|при|про|что|как|или|чем|где|его|это|Для|Без|При|Что|Как) /g;
 function nbText(s) { let p; do { p = s; s = s.replace(NB_RE, '$1$2\u00A0'); } while (p !== s); return s.replace(/ —/g, '\u00A0—').replace(/(\d) (?=[А-Яа-яЁё])/g, '$1\u00A0').replace(/(\d)–(\d)/g, '$1\u2060–\u2060$2'); }
