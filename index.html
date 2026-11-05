@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* Идея: страница построена вокруг сетки 8 × 3 — 24 индикатора, которые команда закрывает вместе.
+  /* Идея: страница построена вокруг сетки 8 × 3 — 24 вида поведения, которые команда закрывает вместе.
      Сетка — единственный яркий элемент; всё остальное тихое, выровнено по левому краю, заголовки разделов в левой колонке. */
   --paper: #FFFFFF;
   --mist: #F3F7F4;
@@ -292,7 +292,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
     <section class="hero">
       <div>
         <h1>Команда изменений</h1>
-        <p class="lead">Ни у&nbsp;кого нет всех 24&nbsp;поведенческих индикаторов, и&nbsp;это не нужно. Важно, чтобы вместе их закрывала команда. Модель помогает подобрать такую команду: 8 критериев, 24 индикатора и карта, которая показывает, где у команды пробелы.</p>
+        <p class="lead">Ни у&nbsp;кого нет всех 24&nbsp;видов поведения, и&nbsp;это не нужно. Важно, чтобы вместе их закрывала команда. Модель помогает подобрать такую команду: 8 критериев, 24 вида поведения и карта, которая показывает, где у команды пробелы.</p>
         <div class="actions">
           <a class="btn" href="#map">Заполнить карту своей команды</a>
           <a class="btn quiet" href="#criteria">Посмотреть критерии</a>
@@ -326,22 +326,22 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
 
     <section class="part" id="criteria">
       <header><h2>Восемь критериев</h2><nav class="critnav" id="critNav" aria-label="Критерии"></nav></header>
-      <div class="body-col" id="critList"><p class="intro">У каждого критерия — зачем он команде, три поведенческих индикатора и признаки дефицита: поведение, которое показывает, что критерия не хватает.</p></div>
+      <div class="body-col" id="critList"><p class="intro">У каждого критерия — зачем он команде, три вида поведения и признаки дефицита: поведение, которое показывает, что критерия не хватает.</p></div>
     </section>
 
     <section class="part" id="map">
       <header><h2>Карта команды</h2><p>До шести человек. Ставьте оценку по конкретному эпизоду: когда вы видели это поведение и что человек сделал. Надёжнее, если оценки дают 2–3 человека: руководитель, коллега из смежного подразделения и сам участник. Данные остаются только в вашем браузере.</p></header>
       <div class="body-col wide">
-        <p class="print-only">Карта команды изменений. Дата: <span id="printDate"></span>. Шкала: 0 — не проявляется, 1 — эпизодически, 2 — устойчиво, н/д — не было случая увидеть. Индикатор закрыт, если устойчиво его проявляют хотя бы двое.</p>
+        <p class="print-only">Карта команды изменений. Дата: <span id="printDate"></span>. Шкала: 0 — не проявляется, 1 — эпизодически, 2 — устойчиво, н/д — не было случая увидеть. Поведение закрыто, если устойчиво его проявляют хотя бы двое.</p>
         <div class="map-top">
           <div>
             <p class="verdict" id="verdict" aria-live="polite"></p>
-            <p class="verdict-sub">Сетка обновляется, пока вы ставите оценки. Три клетки в строке — три индикатора критерия. Нажмите на клетку, чтобы перейти к строке с именами.</p>
+            <p class="verdict-sub">Сетка обновляется, пока вы ставите оценки. Три клетки в строке — три вида поведения внутри критерия. Нажмите на клетку, чтобы перейти к строке с именами.</p>
             <span class="sample-note" id="storageNote" hidden>Этот браузер не сохраняет данные страницы: после перезагрузки карта вернётся к примеру. Чтобы сохранить результат, распечатайте карту.</span>
             <span class="sample-note" id="sampleNote">Сейчас заполнен пример. Впишите своих людей или очистите карту.</span>
           </div>
           <div>
-            <div class="mosaic" id="liveMosaic" aria-label="Покрытие индикаторов вашей командой"></div>
+            <div class="mosaic" id="liveMosaic" aria-label="Покрытие поведения вашей командой"></div>
             <div class="legend"><span class="ok"><i></i>закрыт: двое и больше</span><span class="warn"><i></i>на одном человеке</span><span class="bad"><i></i>пробел: никого</span></div>
           </div>
         </div>
@@ -351,7 +351,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
           <div><dt>2</dt><dd>устойчиво, в том числе в сложных ситуациях</dd></div>
           <div><dt>н/д</dt><dd>не было случая увидеть</dd></div>
         </dl>
-        <p class="rule-line">Индикатор закрыт, если устойчиво (на 2) его проявляют хотя бы двое: тогда команда не зависит от одного человека.</p>
+        <p class="rule-line">Поведение закрыто, если устойчиво (на 2) его проявляют хотя бы двое: тогда команда не зависит от одного человека.</p>
         <div class="table-scroll"><table class="map" id="mapTable"></table></div>
         <div class="m-editor" id="mEditor">
           <p class="m-step">Кого оцениваете</p>
@@ -380,7 +380,7 @@ details.ind-d .desc { margin: 6px 0 4px; font-size: 14px; color: var(--ink-soft)
           <li><b>Закройте пробелы:</b> добавьте в команду человека, который устойчиво проявляет нужное поведение, поставьте в пару того, у кого 2, с тем, у кого 1, или привлеките внешнего эксперта либо спонсора.</li>
         </ol>
         <ul class="rules">
-          <li><b>Индикатор на одном человеке — узкое место.</b> Если этот человек уйдёт, заболеет или перегрузится, индикатор станет пробелом, а на нём самом замыкается слишком много решений и контактов.</li>
+          <li><b>Поведение, которое держится на одном человеке, — узкое место.</b> Если этот человек уйдёт, заболеет или перегрузится, это поведение станет пробелом, а на нём самом замыкается слишком много решений и контактов.</li>
           <li><b>Правило покрытия — рабочий ориентир,</b> а не норма. Корректируйте его под масштаб изменения.</li>
         </ul>
       </div>
@@ -558,7 +558,7 @@ const storageOk = (() => { try { localStorage.setItem('__t', '1'); localStorage.
 
 
 function buildTable() {
-  let h = `<colgroup><col class="c-ind">${'<col>'.repeat(N)}<col class="c-st"></colgroup><thead><tr><th class="sticky" scope="col">Индикатор</th>`;
+  let h = `<colgroup><col class="c-ind">${'<col>'.repeat(N)}<col class="c-st"></colgroup><thead><tr><th class="sticky" scope="col">Поведение</th>`;
   for (let j = 0; j < N; j++) h += `<th scope="col"><label for="nm${j}">Участник ${j + 1}</label><input id="nm${j}" data-n="${j}" value="${esc(state.names[j] || '')}" placeholder="Имя"><span class="pv" id="pn${j}"></span></th>`;
   h += '<th scope="col">Покрытие</th></tr></thead><tbody>';
   let r = 0;
@@ -608,7 +608,7 @@ function refresh() {
   renderMosaic(document.getElementById('liveMosaic'), state);
   const v = document.getElementById('verdict');
   if (cnt.none === 24) v.textContent = 'Карта пуста. Впишите людей и поставьте оценки.';
-  else if (cnt.ok === 24) v.textContent = 'Команда закрывает все 24 индикатора.';
+  else if (cnt.ok === 24) v.textContent = 'Команда закрывает все 24 вида поведения.';
   else { const parts = []; if (cnt.warn) parts.push(`${cnt.warn} ${plural(cnt.warn, 'держится', 'держатся', 'держатся')} на одном человеке`); if (cnt.bad) parts.push(`${cnt.bad} ${plural(cnt.bad, 'пробел', 'пробела', 'пробелов')}`); if (cnt.none) parts.push(`по ${cnt.none} нет данных`);
     const rest = cnt.warn + cnt.bad + cnt.none;
     v.textContent = `Команда закрывает ${cnt.ok} из 24.${rest ? ` Остальные ${rest}: ${parts.join(', ')}.` : ''}`; }
@@ -627,7 +627,7 @@ function refresh() {
     ? `<h3>Что закрыть в первую очередь</h3>`
       + (bad.length ? `<h4>Пробелы</h4><p class="todo-hint">Никто не проявляет это поведение устойчиво. Развивайте тех, у кого оно уже бывает, или ищите человека со стороны.</p><ul>${bad.map(badItem).join('')}</ul>` : '')
       + (warn.length ? `<h4>Держится на одном человеке</h4><p class="todo-hint">Подготовьте второго: начните с тех, у кого это поведение уже бывает.</p><ul>${warn.map(warnItem).join('')}</ul>` : '')
-    : (cnt.none === 24 ? '' : '<h3>Пробелов нет</h3><p>Каждый индикатор устойчиво проявляют хотя бы двое.</p>'))
+    : (cnt.none === 24 ? '' : '<h3>Пробелов нет</h3><p>Каждый вид поведения устойчиво проявляют хотя бы двое.</p>'))
     + (zero.length && cnt.none !== 24 ? `${main ? '' : '<h3>Что учесть</h3>'}<h4>Признаки дефицита</h4><p class="todo-hint">У этих людей поведение не проявляется или заметно обратное. На покрытие это не влияет, но в команде изменений стоит это учитывать.</p><ul>${Object.entries(byPerson).map(([p, ks]) => `<li><b>${esc(p)}</b> — ${esc(ks.join('; '))}</li>`).join('')}</ul>` : '')
     + progsBlock(bad, warn);
   renderMobile();
